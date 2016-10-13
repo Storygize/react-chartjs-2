@@ -70,20 +70,35 @@ const ChartComponent = React.createClass({
 	},
 
 	updateChart() {
-		const {data, options} = this.props;
+        const {data, options} = this.props;
 
-		if (!this.chart_instance) return;
+        if (!this.chart_instance) return;
 
-		if (options) {
-			this.chart_instance.options = Chart.helpers.configMerge(this.chart_instance.options, options);
-		}
+        if (options) {
+            this.chart_instance.options = Chart.helpers.configMerge(this.chart_instance.options, options);
+        }
 
-		this.chart_instance.config.data = {
-			...this.chart_instance.config.data,
-			...data
-		};
+        var currentData = this.chart_instance.config.data.datasets;
+        var nextData = data.datasets;
 
-		this.chart_instance.update();
+        nextData.forEach(function (dataset, sid) {
+            if (currentData[sid] && currentData[sid].data) {
+                currentData[sid].data.splice(nextData[sid].data.length);
+                dataset.data.forEach(function (point, pid) {
+                    currentData[sid].data[pid] = nextData[sid].data[pid];
+                });
+            } else {
+                currentData[sid] = nextData[sid];
+            }
+        });
+        delete data.datasets;
+
+        this.chart_instance.config.data = {
+            ...this.chart_instance.config.data,
+            ...data
+        };
+
+        this.chart_instance.update();
 	},
 
 	renderChart() {

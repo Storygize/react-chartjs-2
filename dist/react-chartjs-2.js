@@ -106,6 +106,21 @@ var ChartComponent = _react2.default.createClass({
 			this.chart_instance.options = _chart2.default.helpers.configMerge(this.chart_instance.options, options);
 		}
 
+		var currentData = this.chart_instance.config.data.datasets;
+		var nextData = data.datasets;
+
+		nextData.forEach(function (dataset, sid) {
+			if (currentData[sid] && currentData[sid].data) {
+				currentData[sid].data.splice(nextData[sid].data.length);
+				dataset.data.forEach(function (point, pid) {
+					currentData[sid].data[pid] = nextData[sid].data[pid];
+				});
+			} else {
+				currentData[sid] = nextData[sid];
+			}
+		});
+		delete data.datasets;
+
 		this.chart_instance.config.data = _extends({}, this.chart_instance.config.data, data);
 
 		this.chart_instance.update();
